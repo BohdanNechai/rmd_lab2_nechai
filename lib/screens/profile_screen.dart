@@ -1,71 +1,63 @@
 import 'package:flutter/material.dart';
 import '../widgets/custom_button.dart';
 import '../utils/app_routes.dart';
+import '../data/local_auth_repository.dart';
+import '../core/user.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
   @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  AppUser? user;
+  final repo = LocalAuthRepository();
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    user = await repo.getUser();
+    setState(() {});
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (user == null) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Профіль'),
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const SizedBox(height: 24),
-              const CircleAvatar(
-                radius: 50,
-                backgroundColor: Colors.blueGrey,
-                child: Icon(Icons.person_outline, size: 50, color: Colors.white),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Імʼя Користувача',
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
-              Text(
-                'user@example.com',
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-              const SizedBox(height: 32),
-              const Divider(),
-              // Можна додати більше налаштувань сюди
-              ListTile(
-                leading: const Icon(Icons.settings_outlined),
-                title: const Text('Налаштування'),
-                onTap: () {},
-              ),
-              ListTile(
-                leading: const Icon(Icons.notifications_outlined),
-                title: const Text('Сповіщення'),
-                onTap: () {},
-              ),
-              ListTile(
-                leading: const Icon(Icons.security_outlined),
-                title: const Text('Безпека'),
-                onTap: () {},
-              ),
-              const Divider(),
-              const SizedBox(height: 32),
-              CustomButton(
-                text: 'Вийти з акаунту',
-                color: Colors.red[400], // Кастомний колір для кнопки
-                onPressed: () {
-                  // Повертаємось на екран логіну і видаляємо всі інші екрани
-                  Navigator.pushNamedAndRemoveUntil(
-                    context,
-                    AppRoutes.login,
-                    (route) => false,
-                  );
-                },
-              ),
-            ],
-          ),
+      appBar: AppBar(title: const Text('Профіль')),
+      body: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          children: [
+            const CircleAvatar(
+              radius: 50,
+              child: Icon(Icons.person_outline, size: 50),
+            ),
+            const SizedBox(height: 16),
+            Text(user!.name, style: Theme.of(context).textTheme.headlineSmall),
+            Text(user!.email),
+
+            const Spacer(),
+
+            CustomButton(
+              text: 'Вийти',
+              color: Colors.red,
+              onPressed: () async {
+                await repo.logout();
+                Navigator.pushNamedAndRemoveUntil(
+                    context, AppRoutes.login, (_) => false);
+              },
+            )
+          ],
         ),
       ),
     );
