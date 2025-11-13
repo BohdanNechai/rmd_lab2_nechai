@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'screens/login_screen.dart';
-import 'screens/register_screen.dart';
-import 'screens/home_screen.dart';
-import 'screens/profile_screen.dart';
-import 'utils/app_routes.dart';
+import 'package:lab2_rmd/screens/login_screen.dart';
+import 'package:lab2_rmd/screens/register_screen.dart';
+import 'package:lab2_rmd/screens/home_screen.dart';
+import 'package:lab2_rmd/screens/profile_screen.dart';
+import 'package:lab2_rmd/utils/app_routes.dart';
+import 'package:lab2_rmd/screens/splash_screen.dart';
 
 void main() {
   runApp(const SmartHomeApp());
@@ -24,9 +25,7 @@ class SmartHomeApp extends StatelessWidget {
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
             padding: const EdgeInsets.symmetric(vertical: 16),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
         ),
         // "Квадратний" стиль для полів вводу
@@ -42,19 +41,19 @@ class SmartHomeApp extends StatelessWidget {
         // "Квадратний" стиль для карток
         cardTheme: CardThemeData(
           elevation: 2,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
       ),
       // Використовуємо іменовані роути для навігації
-      initialRoute: AppRoutes.login,
+      initialRoute: AppRoutes.splash,
       routes: {
-        AppRoutes.login: (context) => const LoginScreen(),
-        AppRoutes.register: (context) => const RegisterScreen(),
-        AppRoutes.home: (context) => const HomeScreen(),
-        AppRoutes.profile: (context) => const ProfileScreen(),
+        AppRoutes.splash: (_) => const SplashScreen(),
+        AppRoutes.login: (_) => const LoginScreen(),
+        AppRoutes.register: (_) => const RegisterScreen(),
+        AppRoutes.home: (_) => const HomeScreen(),
+        AppRoutes.profile: (_) => const ProfileScreen(),
       },
+
       debugShowCheckedModeBanner: false,
     );
   }

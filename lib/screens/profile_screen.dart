@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../widgets/custom_button.dart';
-import '../utils/app_routes.dart';
-import '../data/local_auth_repository.dart';
-import '../core/user.dart';
+import 'package:lab2_rmd/widgets/custom_button.dart';
+import 'package:lab2_rmd/utils/app_routes.dart';
+import 'package:lab2_rmd/data/local_auth_repository.dart';
+import 'package:lab2_rmd/core/user.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -22,41 +22,35 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _load() async {
-    user = await repo.getUser();
-    setState(() {});
+    final u = await repo.getUser();
+    if (!mounted) return;
+    setState(() => user = u);
   }
 
   @override
   Widget build(BuildContext context) {
-    if (user == null) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
-    }
-
     return Scaffold(
       appBar: AppBar(title: const Text('Профіль')),
       body: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(16),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const CircleAvatar(
-              radius: 50,
-              child: Icon(Icons.person_outline, size: 50),
-            ),
-            const SizedBox(height: 16),
-            Text(user!.name, style: Theme.of(context).textTheme.headlineSmall),
-            Text(user!.email),
-
-            const Spacer(),
-
+            Text('Імʼя: ${user?.name ?? '-'}'),
+            Text('Email: ${user?.email ?? '-'}'),
+            const SizedBox(height: 24),
             CustomButton(
               text: 'Вийти',
-              color: Colors.red,
               onPressed: () async {
-                await repo.logout();
+                await repo.logout(); // лише скидати прапорець
+                if (!mounted) return;
                 Navigator.pushNamedAndRemoveUntil(
-                    context, AppRoutes.login, (_) => false);
+                  context,
+                  AppRoutes.login,
+                  (r) => false,
+                );
               },
-            )
+            ),
           ],
         ),
       ),

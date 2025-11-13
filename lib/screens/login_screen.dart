@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import '../widgets/custom_text_field.dart';
-import '../widgets/custom_button.dart';
-import '../utils/app_routes.dart';
-import '../data/local_auth_repository.dart';
-import '../core/validators.dart';
+import 'package:lab2_rmd/widgets/custom_text_field.dart';
+import 'package:lab2_rmd/widgets/custom_button.dart';
+import 'package:lab2_rmd/utils/app_routes.dart';
+import 'package:lab2_rmd/data/local_auth_repository.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -15,26 +14,13 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final repo = LocalAuthRepository();
 
-  final _formKey = GlobalKey<FormState>();
-  final _repo = LocalAuthRepository();
-
-  Future<void> _login() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    final success = await _repo.login(
-      _emailController.text.trim(),
-      _passwordController.text.trim(),
-    );
-
-    if (!success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Невірний логін або пароль')),
-      );
-      return;
-    }
-
-    Navigator.pushNamed(context, AppRoutes.home);
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
   }
 
   @override
@@ -48,45 +34,60 @@ class _LoginScreenState extends State<LoginScreen> {
             horizontal: screenWidth > 600 ? screenWidth * 0.2 : 24,
             vertical: 24,
           ),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              children: [
-                SizedBox(height: MediaQuery.of(context).size.height * 0.1),
-                Icon(Icons.home_work_outlined, size: 100, color: Colors.blueGrey[700]),
-                const SizedBox(height: 32),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SizedBox(height: MediaQuery.of(context).size.height * 0.1),
+              Icon(Icons.home_work_outlined, size: 100, color: Colors.blueGrey[700]),
+              const SizedBox(height: 16),
+              Text(
+                'Вітаємо в Smart Home',
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
+              const SizedBox(height: 32),
 
-                CustomTextField(
-                  hintText: 'Email',
-                  icon: Icons.email_outlined,
-                  controller: _emailController,
-                  validator: Validators.email,
-                ),
-                const SizedBox(height: 16),
+              CustomTextField(
+                hintText: 'Email',
+                icon: Icons.email_outlined,
+                controller: _emailController,
+              ),
+              const SizedBox(height: 16),
 
-                CustomTextField(
-                  hintText: 'Пароль',
-                  icon: Icons.lock_outline,
-                  controller: _passwordController,
-                  isPassword: true,
-                  validator: Validators.password,
-                ),
+              CustomTextField(
+                hintText: 'Пароль',
+                icon: Icons.lock_outline,
+                isPassword: true,
+                controller: _passwordController,
+              ),
+              const SizedBox(height: 32),
 
-                const SizedBox(height: 32),
+              CustomButton(
+                text: 'Увійти',
+                onPressed: () async {
+                  final success = await repo.login(
+                    _emailController.text.trim(),
+                    _passwordController.text.trim(),
+                  );
 
-                CustomButton(
-                  text: 'Увійти',
-                  onPressed: _login,
-                ),
+                  if (success) {
+                    Navigator.pushReplacementNamed(context, AppRoutes.home);
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Невірні дані')),
+                    );
+                  }
+                },
+              ),
 
-                const SizedBox(height: 16),
+              const SizedBox(height: 16),
 
-                TextButton(
-                  onPressed: () => Navigator.pushNamed(context, AppRoutes.register),
-                  child: const Text('Немає акаунту? Зареєструватись'),
-                ),
-              ],
-            ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, AppRoutes.register);
+                },
+                child: const Text('Немає акаунту? Зареєструватись'),
+              ),
+            ],
           ),
         ),
       ),

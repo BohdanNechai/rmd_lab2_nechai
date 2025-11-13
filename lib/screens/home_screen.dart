@@ -1,13 +1,31 @@
 import 'package:flutter/material.dart';
-import '../widgets/device_card.dart';
-import '../utils/app_routes.dart';
+import 'package:lab2_rmd/widgets/device_card.dart';
+import 'package:lab2_rmd/utils/app_routes.dart';
+import 'package:lab2_rmd/services/mqtt_service.dart';
 
 // Цей екран демонструє вашу ідею "Smart Home"
 // Він використовує LayoutBuilder та GridView для адаптивності
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  final mqtt = MqttService();
+  String temperature = '...';
+
+  @override
+  void initState() {
+    super.initState();
+    mqtt.onData = (data) {
+      setState(() => temperature = data);
+    };
+    mqtt.connect();
+  }
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -29,7 +47,7 @@ class HomeScreen extends StatelessWidget {
         child: LayoutBuilder(
           builder: (context, constraints) {
             // Адаптивність: 2 колонки на телефоні, 4 на планшеті
-            int crossAxisCount = constraints.maxWidth > 600 ? 4 : 2;
+            final int crossAxisCount = constraints.maxWidth > 600 ? 4 : 2;
 
             return GridView.builder(
               padding: const EdgeInsets.all(16),

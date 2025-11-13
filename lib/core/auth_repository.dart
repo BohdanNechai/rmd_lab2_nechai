@@ -1,4 +1,4 @@
-import 'user.dart';
+import 'package:lab2_rmd/core/user.dart';
 
 abstract class AuthRepository {
   Future<void> register(AppUser user);

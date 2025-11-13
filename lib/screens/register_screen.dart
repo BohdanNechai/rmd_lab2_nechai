@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import '../widgets/custom_button.dart';
-import '../widgets/custom_text_field.dart';
-import '../core/validators.dart';
-import '../core/user.dart';
-import '../data/local_auth_repository.dart';
-import '../utils/app_routes.dart';
+import 'package:lab2_rmd/widgets/custom_button.dart';
+import 'package:lab2_rmd/widgets/custom_text_field.dart';
+import 'package:lab2_rmd/core/validators.dart';
+import 'package:lab2_rmd/core/user.dart';
+import 'package:lab2_rmd/data/local_auth_repository.dart';
+import 'package:lab2_rmd/utils/app_routes.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
