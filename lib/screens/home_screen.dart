@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:lab2_rmd/data/device_local_repo.dart';
+import 'package:lab2_rmd/data/device_remote_repo.dart';
+import 'package:lab2_rmd/data/device_repo_facade.dart';
+
 import 'package:lab2_rmd/widgets/device_card.dart';
 import 'package:lab2_rmd/utils/app_routes.dart';
-import 'package:lab2_rmd/services/mqtt_service.dart';
-
-// Цей екран демонструє вашу ідею "Smart Home"
-// Він використовує LayoutBuilder та GridView для адаптивності
+import 'package:lab2_rmd/core/device_model.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -14,18 +16,26 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final mqtt = MqttService();
-  String temperature = '...';
+  late final DeviceRepositoryFacade _facade;
+  late Future<List<DeviceModel>> _future;
 
   @override
   void initState() {
     super.initState();
-    mqtt.onData = (data) {
-      setState(() => temperature = data);
-    };
-    mqtt.connect();
+    _facade = DeviceRepositoryFacade(
+      remote: DeviceRemoteRepository(http.Client()),
+      local: DeviceLocalRepository(),
+    );
+    _future = _facade.getDevices();
   }
-  
+
+  Future<void> _refresh() async {
+    setState(() {
+      _future = _facade.getDevices();
+    });
+    await _future;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -34,73 +44,54 @@ class _HomeScreenState extends State<HomeScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.person_outline),
-            // Навігація на екран профілю
-            onPressed: () {
-              Navigator.pushNamed(context, AppRoutes.profile);
-            },
+            onPressed: () => Navigator.pushNamed(context, AppRoutes.profile),
           ),
         ],
       ),
       body: SafeArea(
-        // LayoutBuilder дає нам 'constraints' (обмеження)
-        // які ми використовуємо для визначення кількості колонок
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            // Адаптивність: 2 колонки на телефоні, 4 на планшеті
-            final int crossAxisCount = constraints.maxWidth > 600 ? 4 : 2;
+        child: FutureBuilder<List<DeviceModel>>(
+          future: _future,
+          builder: (context, snap) {
+            if (snap.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-            return GridView.builder(
-              padding: const EdgeInsets.all(16),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: crossAxisCount,
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 16,
-                childAspectRatio: 1.0, // Робить картки квадратними
+            if (snap.hasError) {
+              return Center(child: Text('Помилка: ${snap.error}'));
+            }
+
+            final items = snap.data ?? [];
+            if (items.isEmpty) {
+              return const Center(child: Text('Немає даних (кеш порожній)'));
+            }
+
+            return RefreshIndicator(
+              onRefresh: _refresh,
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final crossAxisCount = constraints.maxWidth > 600 ? 4 : 2;
+
+                  return GridView.builder(
+                    padding: const EdgeInsets.all(16),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: crossAxisCount,
+                      crossAxisSpacing: 16,
+                      mainAxisSpacing: 16,
+                      childAspectRatio: 1,
+                    ),
+                    itemCount: items.length,
+                    itemBuilder: (context, i) {
+                      final d = items[i];
+                      return DeviceCard(
+                        deviceName: d.name,
+                        status: d.online ? 'online' : 'offline',
+                        icon: d.online ? Icons.lightbulb_outline : Icons.power_settings_new,
+                        isActive: d.online,
+                      );
+                    },
+                  );
+                },
               ),
-              itemCount: 6, // Кількість пристроїв
-              itemBuilder: (context, index) {
-                // Mock-дані для пристроїв
-                // Тут ми перевикористовуємо наш DeviceCard
-                final devices = [
-                  const DeviceCard(
-                    deviceName: 'Вітальня',
-                    status: 'Увімкнено',
-                    icon: Icons.lightbulb_outline,
-                    isActive: true,
-                  ),
-                  const DeviceCard(
-                    deviceName: 'Спальня',
-                    status: '21°C',
-                    icon: Icons.thermostat_outlined,
-                    isActive: true,
-                  ),
-                  const DeviceCard(
-                    deviceName: 'Вхідні двері',
-                    status: 'Замкнено',
-                    icon: Icons.lock_outline,
-                    isActive: true,
-                  ),
-                  const DeviceCard(
-                    deviceName: 'Гараж',
-                    status: 'Вимкнено',
-                    icon: Icons.garage_outlined,
-                    isActive: false,
-                  ),
-                  const DeviceCard(
-                    deviceName: 'Кухня',
-                    status: 'Вимкнено',
-                    icon: Icons.coffee_maker_outlined,
-                    isActive: false,
-                  ),
-                  const DeviceCard(
-                    deviceName: 'Камера',
-                    status: 'Запис...',
-                    icon: Icons.videocam_outlined,
-                    isActive: true,
-                  ),
-                ];
-                return devices[index];
-              },
             );
           },
         ),
