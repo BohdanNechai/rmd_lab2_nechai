@@ -1,3 +1,8 @@
 {
-    "cmake.sourceDirectory": "C:/rmd/lab2_rmd/linux"
+    "cmake.sourceDirectory": "C:/rmd/lab2_rmd/linux",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+        "source.fixAll": "explicit"
+    },
+    "dart.lineLength": 100
 }
