@@ -18,12 +18,12 @@ import 'package:lab2_rmd/screens/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+       
   // 2. Ініціалізуємо зовнішні сервіси
   final prefs = await SharedPreferences.getInstance();
   final client = http.Client();
 
-  // 3. Створюємо репозиторій ОДИН РАЗ (Вимога лаби про Singleton)
+  // 3. Створюємо репозиторій ОДИН РАЗ
   final deviceRepository = DeviceRepositoryFacade(
     remote: DeviceRemoteRepository(client, prefs),
     local: DeviceLocalRepository(),

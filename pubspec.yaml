@@ -31,6 +31,13 @@ dependencies:
   flutter:
     sdk: flutter
 
+
+  flashlight_plugin:
+    git:
+      url: https://github.com/BohdanNechai/flashlight_plugin
+      ref: main
+      
+
   http: ^1.2.0
   shared_preferences: ^2.3.2
   connectivity_plus: ^7.0.0
@@ -42,8 +49,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
-  
-  # ... твої інші пакети (http, shared_preferences)
+
   flutter_bloc: ^8.1.3  # Головна бібліотека
 
 

@@ -11,7 +11,7 @@ class DeviceRemoteRepository implements DeviceRepository {
 
   @override
   Future<List<DeviceModel>> fetchDevices() async {
-    final uri = Uri.parse('https://691c7fd93aaeed735c911ab  f.mockapi.io/devices');
+    final uri = Uri.parse('https://691c7fd93aaeed735c911abf.mockapi.io/devices');
 
     final res = await client.get(uri);
 
