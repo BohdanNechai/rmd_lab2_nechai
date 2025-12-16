@@ -1,32 +1,31 @@
+import 'dart:async';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
 
+// Простий клас для передачі даних
+class MqttData {
+  final String topic;
+  final String message;
+  MqttData(this.topic, this.message);
+}
+
 class MqttService {
-  final MqttServerClient client = MqttServerClient('broker.hivemq.com', 'flutter_client_id');
+  final MqttServerClient client = MqttServerClient(
+    'broker.hivemq.com',
+    'flutter_client_${DateTime.now().millisecondsSinceEpoch}',
+  );
 
-  Function(String data)? onData;
-  MqttService() {
-    // Initialize client settings in constructor if needed
-  }
-
-  void disconnect() {
-    client.disconnect();
-  }
-
-  void publish(String topic, String message) {
-    final builder = MqttClientPayloadBuilder();
-    builder.addString(message);
-    client.publishMessage(topic, MqttQos.atMostOnce, builder.payload!);
-  }
+  // Тепер стрім передає об'єкт MqttData (топік і повідомлення)
+  final _controller = StreamController<MqttData>.broadcast();
+  Stream<MqttData> get messageStream => _controller.stream;
 
   Future<void> connect() async {
     client.port = 1883;
+    client.logging(on: false);
     client.keepAlivePeriod = 20;
-    client.onDisconnected = () => print('MQTT disconnected');
-    client.onConnected = () => print('MQTT connected');
 
     final connMessage = MqttConnectMessage()
-        .withClientIdentifier('flutter_client_id')
+        .withClientIdentifier(client.clientIdentifier)
         .startClean()
         .withWillQos(MqttQos.atMostOnce);
 
@@ -35,21 +34,31 @@ class MqttService {
     try {
       await client.connect();
     } catch (e) {
-      print('MQTT Connect ERROR: $e');
+      print('MQTT Error: $e');
       client.disconnect();
       return;
     }
 
     if (client.connectionStatus!.state == MqttConnectionState.connected) {
-      client.subscribe('sensor/temperature', MqttQos.atMostOnce);
+      print('MQTT Connected');
 
-      client.updates!.listen((messages) {
-        final msg = messages[0].payload as MqttPublishMessage;
-        final payload =
-            MqttPublishPayload.bytesToStringAsString(msg.payload.message);
+      // Підписуємось на все в smart_home
+      client.subscribe('iot/smart_home/#', MqttQos.atMostOnce);
 
-        if (onData != null) onData!(payload);
+      client.updates!.listen((List<MqttReceivedMessage<MqttMessage?>>? c) {
+        final recMess = c![0].payload as MqttPublishMessage;
+        final payload = MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
+        final topic = c[0].topic; // Отримуємо топік
+
+        print('MQTT: [$topic] -> $payload');
+
+        // Передаємо і топік, і повідомлення далі
+        _controller.add(MqttData(topic, payload));
       });
     }
+  }
+
+  void disconnect() {
+    client.disconnect();
   }
 }
