@@ -45,8 +45,7 @@ class MqttService {
 
       client.updates!.listen((messages) {
         final msg = messages[0].payload as MqttPublishMessage;
-        final payload =
-            MqttPublishPayload.bytesToStringAsString(msg.payload.message);
+        final payload = MqttPublishPayload.bytesToStringAsString(msg.payload.message);
 
         if (onData != null) onData!(payload);
       });

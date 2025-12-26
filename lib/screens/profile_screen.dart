@@ -44,11 +44,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               onPressed: () async {
                 await repo.logout(); // лише скидати прапорець
                 if (!mounted) return;
-                Navigator.pushNamedAndRemoveUntil(
-                  context,
-                  AppRoutes.login,
-                  (r) => false,
-                );
+                Navigator.pushNamedAndRemoveUntil(context, AppRoutes.login, (r) => false);
               },
             ),
           ],

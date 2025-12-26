@@ -40,10 +40,7 @@ class _LoginScreenState extends State<LoginScreen> {
               SizedBox(height: MediaQuery.of(context).size.height * 0.1),
               Icon(Icons.home_work_outlined, size: 100, color: Colors.blueGrey[700]),
               const SizedBox(height: 16),
-              Text(
-                'Вітаємо в Smart Home',
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
+              Text('Вітаємо в Smart Home', style: Theme.of(context).textTheme.headlineSmall),
               const SizedBox(height: 32),
 
               CustomTextField(
@@ -72,9 +69,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   if (success) {
                     Navigator.pushReplacementNamed(context, AppRoutes.home);
                   } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Невірні дані')),
-                    );
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(const SnackBar(content: Text('Невірні дані')));
                   }
                 },
               ),
